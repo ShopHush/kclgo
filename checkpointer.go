@@ -8,7 +8,7 @@ import (
 var _ CheckPointer = (*KCLCheckPointer)(nil)
 
 type KCLCheckPointer struct {
-	handler *ioHandler
+	handler *IoHandler
 }
 
 // CheckPoints at a particular sequence number you provide or if no sequence number is given, the checkpoint will
@@ -58,7 +58,7 @@ func (c *KCLCheckPointer) getResponse() error {
 	return nil
 }
 
-func NewCheckPointer(handler *ioHandler) *KCLCheckPointer {
+func NewCheckPointer(handler *IoHandler) *KCLCheckPointer {
 	ck := new(KCLCheckPointer)
 	ck.handler = handler
 	return ck

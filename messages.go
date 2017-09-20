@@ -15,6 +15,7 @@ type InitializeInput struct {
 	SubSequenceNumber int     `json:"subSequenceNumber"`
 }
 
+//{"action":"initialize","shardId":"shardId-000000000000","sequenceNumber":"TRIM_HORIZON","subSequenceNumber":0}
 func (i *InitializeInput) Perform(processor RecordProcessor) error {
 	return processor.Initialize(i)
 }
@@ -98,8 +99,8 @@ type ActionResponse struct {
 }
 
 func getActionResponse(action string) ActionResponse {
-	return ActionResponse{ 
-		Action: "status",
+	return ActionResponse{
+		Action:      "status",
 		ResponseFor: action,
-		}
+	}
 }

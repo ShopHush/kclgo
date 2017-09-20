@@ -2,13 +2,13 @@ package kclgo
 
 import (
 	"fmt"
-	"log"
 )
 
 type KCL struct {
-	handler *ioHandler
-	cp *KCLCheckPointer
-	processor *KCLRecordProcessor
+	handler      *IoHandler
+	checkpointer CheckPointer
+	processor    RecordProcessor
+	config       *KCLConfig
 }
 
 func (k *KCL) performAction(action ActionInterface) (err error) {
@@ -30,7 +30,6 @@ func (k *KCL) performAction(action ActionInterface) (err error) {
 	if err != nil {
 		return err
 	}
-	k.reportDone(action)
 	return nil
 }
 
@@ -41,21 +40,56 @@ func (k *KCL) reportDone(action ActionInterface) {
 func (k *KCL) handleLine(line *string) {
 	action, err := k.handler.LoadAction(line)
 	if err != nil {
-		log.Printf("Error loading line: %s\n", err.Error())
+		k.config.ErrLogger.Printf("Error (%s) loading line: (%s) with action (%s)\n", *line, err.Error(), action.GetAction())
+		return
 	}
 	err = k.performAction(action)
 	if err != nil {
-		log.Printf("Error loading line: %s\n", err.Error())
+		k.config.ErrLogger.Printf("Error (%s) loading line: (%s) with action (%s)\n", *line, err.Error(), action.GetAction())
+		return
 	}
-	k.reportDone(action)
+	switch action.(type) {
+	case *checkPointResponse:
+		// don't respond to the response
+		return
+	default:
+		k.reportDone(action)
+	}
+
 }
 func (k *KCL) Run() {
-
 	for {
 		line, err := k.handler.ReadLine()
 		if err != nil {
-			log.Println(err)
+			k.config.ErrLogger.Println(err)
+		} else {
+			k.handleLine(&line)
 		}
-		k.handleLine(&line)
 	}
+}
+
+func NewDefaultKCL(config *KCLConfig, processingFunc RecordProcessingFunc) (*KCL, error) {
+	k := new(KCL)
+	k.config = config
+	k.handler = NewIOHandler(config)
+	if err := k.handler.Init(); err != nil {
+		return nil, err
+	}
+	k.checkpointer = NewCheckPointer(k.handler)
+	k.processor = NewDefaultRecordProcessor(config, k.handler, k.checkpointer, processingFunc)
+
+	return k, nil
+}
+
+func NewKCL(config *KCLConfig, processor RecordProcessor) (*KCL, error) {
+	k := new(KCL)
+	k.config = config
+	k.handler = NewIOHandler(config)
+	if err := k.handler.Init(); err != nil {
+		return nil, err
+	}
+	k.checkpointer = NewCheckPointer(k.handler)
+	k.processor = processor
+
+	return k, nil
 }

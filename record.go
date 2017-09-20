@@ -23,5 +23,3 @@ func (r *Record) BinaryData() ([]byte, error) {
 func (r *Record) ApproximateArrivalTime() time.Time {
 	return time.Unix(int64(r.ApproximateArrivalTimestamp), 0)
 }
-
-

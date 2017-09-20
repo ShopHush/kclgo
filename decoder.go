@@ -17,6 +17,7 @@ func slurpToFirstComma(message *string) (string, error) {
 		}
 	}
 	t := make([]byte, i, i)
+	// copy stops early upon reaching the capacity of src or dest.
 	copy(t, *message)
 	t = append(t, '}')
 
@@ -30,7 +31,7 @@ func slurpToFirstComma(message *string) (string, error) {
 }
 
 func decodeMessage(message *string) (ActionInterface, error) {
-	action, err  := slurpToFirstComma(message)
+	action, err := slurpToFirstComma(message)
 	if err != nil {
 		return nil, err
 	}
