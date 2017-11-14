@@ -1,15 +1,17 @@
 package kclgo
 
 import (
-	"github.com/rickar/props"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/rickar/props"
 )
 
 var _ ConfigInterface = (*KCLConfig)(nil)
 
 type KCLConfig struct {
+	StreamName            string
 	InputFileName         string
 	OutputFileName        string
 	ErrorFileName         string
@@ -33,6 +35,7 @@ func (cfg *KCLConfig) Parse(propertiesFile string) error {
 		return err
 	}
 
+	cfg.StreamName = p.GetDefault("streamName", "")
 	cfg.InputFileName = p.GetDefault("InputFileName", "")
 	cfg.OutputFileName = p.GetDefault("OutputFileName", "")
 	cfg.ErrorFileName = p.GetDefault("ErrorFileName", "")
